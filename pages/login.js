@@ -1,17 +1,22 @@
 import Link from 'next/link'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {IoLogoGoogle, IoLogoFacebook} from 'react-icons/io'
 import { auth } from '@/firebase/firebase'
-import {signInWithEmailAndPassword} from 'firebase/auth'
+import {signInWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,FacebookAuthProvider,sendPasswordResetEmail } from 'firebase/auth'
 import { useAuth } from '@/context/authContext'
 import { useRouter } from 'next/router'
+import ToastMessage from '@/components/ToastMessage'
+import {toast } from 'react-toastify';
 
+const gProvider= new GoogleAuthProvider();
+const fProvider= new FacebookAuthProvider();
 
 
 const  Login=()=> {
 
     const router =useRouter()
     const {currentUser,isLoading}=useAuth();
+    const [email,setEmail]=useState('')
     
     useEffect(()=>{
         if (!isLoading && currentUser) {
@@ -31,11 +36,42 @@ const  Login=()=> {
             console.error(error);
         }
 
-
     }
+    const signInWithGoogle = async()=>{
+        try {
+            await signInWithPopup(auth,gProvider);
+        } catch (error) {
+            console.error(error)
+        }
+      }
+
+      const signInWithFacebook = async()=>{
+        try {
+            await signInWithPopup(auth,fProvider);
+        } catch (error) {
+            console.error(error)
+        }
+      };
+      
+      const resetPassword= async()=>{
+        try {
+            toast.promise(async()=>{
+                await sendPasswordResetEmail(auth,email)
+            },{
+                pending: 'Genereting reset link',
+      success: 'Reset email sent to your registered email id',
+      error: 'Emial is not available'
+            },{
+                autoclose:5000
+            })
+        } catch (error) {
+            console.error(error);
+        }
+      }
     
   return isLoading || (!isLoading && currentUser) ? 'Loading...' : (
     <div className='h-[100vh] flex justify-center items-center bg-c1'>
+        <ToastMessage/>
         <div className='flex items-center flex-col'>
     <div className='text-center'>
         <div className='text-4xl font-bold'>
@@ -46,15 +82,15 @@ const  Login=()=> {
     </div>
     <div className='flex items-center gap-2 w-full mt-10 mb-5'>
         <div className='bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-1/2 h-14
-        rounded-md cursor-pointer p-[1px]'>
+        rounded-md cursor-pointer p-[1px]' onClick={signInWithGoogle}>
                 <div className='flex items-center justify-center gap-3 text-white font-semibold bg-c1 
-                w-full h-full rounded-md'>
+                w-full h-full rounded-md' >
                     <IoLogoGoogle size={24}/>
                     <span> Login with Google</span>
                 </div>
         </div>
         <div className='bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-1/2 h-14
-        rounded-md cursor-pointer p-[1px]'>
+        rounded-md cursor-pointer p-[1px]' onClick={signInWithFacebook}>
                 <div className='flex items-center justify-center gap-3 text-white font-semibold bg-c1 
                 w-full h-full rounded-md'>
                     <IoLogoFacebook size={24}/>
@@ -76,6 +112,7 @@ const  Login=()=> {
         placeholder='Email'
         className='w-full h-14 bg-c5 rounded-xl outline-none border-none px-5 text-c3'
         autoComplete='off'
+        onChange={(e)=>setEmail(e.target.value)}
         />
         <input
         type='password'
@@ -84,7 +121,7 @@ const  Login=()=> {
         autoComplete='off'
         />
         <div className='text-right w-full text-c3'>
-            <span className='cursor-pointer'> Forgot Password</span>
+            <span className='cursor-pointer' onClick={resetPassword}> Forgot Password</span>
         </div>
         <button className='mt-4 w-full h-14 rounded-xl outline-none text-base font-semibold
         bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500'>Login to your account</button>

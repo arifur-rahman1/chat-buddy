@@ -1,14 +1,45 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect } from 'react'
 import {IoLogoGoogle, IoLogoFacebook} from 'react-icons/io'
+import { auth } from '@/firebase/firebase'
+import {signInWithEmailAndPassword} from 'firebase/auth'
+import { useAuth } from '@/context/authContext'
+import { useRouter } from 'next/router'
 
-function Login() {
-  return (
+
+
+const  Login=()=> {
+
+    const router =useRouter()
+    const {currentUser,isLoading}=useAuth();
+    
+    useEffect(()=>{
+        if (!isLoading && currentUser) {
+            // it means user loged in
+            router.push("/")
+        }
+    },[currentUser,isLoading])
+
+    const handleSubmit = async (e)=>{
+        e.preventDefault();
+        const email=e.target[0].value;
+        // using target[0],[1] for get the value of my first input and second input
+        const password=e.target[1].value;
+        try {
+            await signInWithEmailAndPassword(auth,email,password)
+        } catch (error) {
+            console.error(error);
+        }
+
+
+    }
+    
+  return isLoading || (!isLoading && currentUser) ? 'Loading...' : (
     <div className='h-[100vh] flex justify-center items-center bg-c1'>
         <div className='flex items-center flex-col'>
     <div className='text-center'>
         <div className='text-4xl font-bold'>
-            Login to your account 
+           Login to your account 
         </div>
         <div className='mt-3 text-c3'> Connect and chat with anyone,anywhre
         </div>
@@ -37,7 +68,9 @@ function Login() {
         <span className=' w-5 h-[1px] bg-c3'></span>
     </div>
 
-    <form className='flex flex-col items-center gap-3 w-[500px] mt-5'>
+    <form className='flex flex-col items-center gap-3 w-[500px] mt-5'
+    onSubmit={handleSubmit}
+    >
         <input
         type='email'
         placeholder='Email'

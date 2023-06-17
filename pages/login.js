@@ -7,6 +7,7 @@ import { auth } from '@/firebase/firebase'
 import {signInWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,FacebookAuthProvider,sendPasswordResetEmail } from 'firebase/auth'
 import { useAuth } from '@/context/authContext'
 import { useRouter } from 'next/router'
+import Loader from '@/components/Loader';
 
 
 const gProvider= new GoogleAuthProvider();
@@ -69,8 +70,9 @@ const  Login=()=> {
             console.error(error);
         }
       }
+      
     
-  return isLoading || (!isLoading && currentUser) ? 'Loading...' : (
+  return isLoading || (!isLoading && currentUser) ? <Loader/> : (
     <div className='h-[100vh] flex justify-center items-center bg-c1'>
         <ToastMessage/>
         <div className='flex items-center flex-col'>

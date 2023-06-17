@@ -12,6 +12,7 @@ const gProvider= new GoogleAuthProvider();
 const fProvider= new FacebookAuthProvider();
 
 import { profileColors } from '@/utils/constants'
+import Loader from '@/components/Loader'
 
 const Register=()=> {
     const router =useRouter()
@@ -72,7 +73,7 @@ const Register=()=> {
 
     }
 
-  return isLoading || (!isLoading && currentUser) ? 'Loading...' : (
+  return isLoading || (!isLoading && currentUser) ? <Loader/> : (
     <div className='h-[100vh] flex justify-center items-center bg-c1'>
         <div className='flex items-center flex-col'>
     <div className='text-center'>

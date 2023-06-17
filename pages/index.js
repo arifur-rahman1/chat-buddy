@@ -1,3 +1,5 @@
+import LeftNav from '@/components/LeftNav';
+import Loader from '@/components/Loader';
 import { useAuth } from '@/context/authContext'
 import { useRouter } from 'next/router'
 import React, { useEffect } from 'react'
@@ -12,11 +14,22 @@ const Home = () => {
       router.push('/login')
     }
   },[currentUser,isLoading])
-  return (
-    <div>
-      <button className='bg-c1' onClick={signOut}>
-        sign out
-      </button>
+
+  
+
+  return  !currentUser? <Loader/> : (
+    
+    <div className='bg-c1 flex h-[100vh]'>
+     
+      <div className='flex w-full shrink-0'>
+       
+         <LeftNav/>
+      
+        <div className='flex bg-c2 grow'>
+            <div>Sidebar</div>
+            <div>Chat</div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
-import { auth } from "@/firebase/firebase";
+import { auth, db } from "@/firebase/firebase";
 import { onAuthStateChanged, signOut as authSignOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import {createContext, useContext, useEffect, useState } from "react"
 
 const UserContext=createContext();
@@ -13,13 +14,16 @@ export const UserProvider =({children})=>{
         setIsloading(false)
     }
 
-    const authStateChanged=(user)=>{
+    const authStateChanged= async (user)=>{
         setIsloading(true);
         if (!user) {
             clear()
             return;
         }
-        setCurrentuser(user)
+
+     const userDoc = await getDoc (doc(db,"users",user.uid))
+
+        setCurrentuser(userDoc.data());
         setIsloading(false)
     }
 

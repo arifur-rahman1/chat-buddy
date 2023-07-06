@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import {BiEdit} from "react-icons/bi"
+import {BiCheck, BiEdit} from "react-icons/bi"
 import {FiPlus} from "react-icons/fi"
 import {IoClose, IoLogOutOutline} from "react-icons/io5"
 import {BsFillCheckCircleFill} from "react-icons/bs"
@@ -7,11 +7,63 @@ import {MdPhotoCamera, MdAddAPhoto, MdDeleteForever} from "react-icons/md"
 import Avater from './Avater'
 import { useAuth } from '@/context/authContext'
 import Icon from './Icon'
+import { profileColors } from '@/utils/constants'
+import {toast } from 'react-toastify';
+import ToastMessage from '@/components/ToastMessage'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db,auth } from '@/firebase/firebase'
+import { updateProfile } from 'firebase/auth'
+
+
 const LeftNav = () => {
 
   const [editProfile, setEditProfile]=useState(true);
   const [nameEdited, setNameEdited]=useState(false);
-    const {currentUser, signOut}=useAuth();
+    const {currentUser, signOut,setCurrentuser}=useAuth();
+
+    const authUser=auth.currentUser;
+    const handleUpdateProfile=(type,value)=>{
+      let obj= {...currentUser}
+      switch (type) {
+        case "color":
+          obj.color=value;
+          break;
+          case "name":
+          obj.displayName=value;
+          break;
+          case "photo":
+            obj.photoURL=value;
+            break;
+            case "photo-remove":
+          obj.photoURL=null;
+          break;
+        default:
+          break;
+      }
+      try {
+        toast.promise(async()=>{
+          const userDocRef= doc(db,"users",currentUser.uid)
+        await updateDoc(userDocRef,obj)
+        setCurrentuser(obj)
+        if(type==="photo-remove"){
+          await updateProfile(authUser,{photoURL:null})
+        }
+        if(type==="name"){
+          await updateProfile(authUser,{displayName:value})
+          setNameEdited(false);
+        }
+
+        },{
+            pending: 'Updating profile',
+          success: 'profile updated successfully',
+           error: 'Profile update failed'
+        },{
+            autoclose:3000
+        })
+    } catch (error) {
+        console.error(error);
+    }
+    }
 
     const onkeyup=(event)=>{ 
       if(event.target.innerText.trim() !== currentUser.displayName){
@@ -19,7 +71,7 @@ const LeftNav = () => {
         setNameEdited(true)
       }else{
         //name is not edited
-        setNameEdited(flase)
+        setNameEdited(false)
       }
     } 
     const onkeydown=(event)=>{
@@ -32,6 +84,7 @@ const LeftNav = () => {
     const editProfileContainer =()=>{
       return (
         <div className='relative flex flex-col items-center'>
+          <ToastMessage/>
           <Icon 
           size="small"
           className="absolute top-0 right-5 hover:bg-c2"
@@ -41,6 +94,7 @@ const LeftNav = () => {
           <div className='relative group cursor-pointer'>
           <Avater size="xx-large" user={currentUser}/>
           <div className='w-full h-full rounded-full bg-black/[0.5] absolute top-0 left-0 justify-center items-center hidden group-hover:flex '>
+            {/* profile avater icon added code */}
             <label htmlFor='fileUpload'>
             {currentUser.photoURL ? ( <MdPhotoCamera size={34}/>) :
              ( <MdAddAPhoto size={34}/>)}
@@ -63,7 +117,7 @@ const LeftNav = () => {
             {!nameEdited && <BiEdit className='text-c3'/>}
             {nameEdited && (<BsFillCheckCircleFill className='text-c4 cursor-pointer'
             onClick={()=>{
-              //name edit logic
+              handleUpdateProfile("name",document.getElementById('displayNameEdit').innerText)
             }}
             />)}
               <div contentEditable
@@ -75,6 +129,13 @@ const LeftNav = () => {
           </div>
           <span className='text-c3 text-sm'>{currentUser.email}</span>
           </div>
+         <div className='grid grid-cols-5 gap-4 mt-5'>
+            {profileColors.map((colors,index)=>(
+              <span key={index} className='w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-125' style={{backgroundColor:colors}}>
+              {colors===currentUser.color && (  <BiCheck size={24}/>)}
+              </span>
+            ))}
+         </div>
         </div>
       )
     }

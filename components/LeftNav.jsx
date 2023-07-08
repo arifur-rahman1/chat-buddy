@@ -50,12 +50,13 @@ const LeftNav = () => {
             console.error(error);
           },
           () => {
-            getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-              console.log("File available at", downloadURL);
-              handleUpdateProfile("photo",downloadURL)
-              await updateProfile(authUser, { photoURL: downloadURL });
-
-            });
+            getDownloadURL(uploadTask.snapshot.ref).then(
+              async (downloadURL) => {
+                console.log("File available at", downloadURL);
+                handleUpdateProfile("photo", downloadURL);
+                await updateProfile(authUser, { photoURL: downloadURL });
+              }
+            );
           }
         );
       }
@@ -154,7 +155,10 @@ const LeftNav = () => {
             />
           </div>
           {currentUser.photoURL && (
-            <div className="w-6 h-6 rounded-full bg-red-500 flex justify-center items-center absolute right-0 bottom-0" onClick={()=>handleUpdateProfile("photo-remove")}>
+            <div
+              className="w-6 h-6 rounded-full bg-red-500 flex justify-center items-center absolute right-0 bottom-0"
+              onClick={() => handleUpdateProfile("photo-remove")}
+            >
               <MdDeleteForever size={14} />
             </div>
           )}

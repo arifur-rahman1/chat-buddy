@@ -14,9 +14,12 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db, auth, storage } from "@/firebase/firebase";
 import { updateProfile } from "firebase/auth";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import UsersPopup from "./popup/UsersPopup";
+
 
 const LeftNav = () => {
-  const [editProfile, setEditProfile] = useState(true);
+  const [usersPopup, setUsersPopup] = useState(false);
+  const [editProfile, setEditProfile] = useState(false);
   const [nameEdited, setNameEdited] = useState(false);
   const { currentUser, signOut, setCurrentuser } = useAuth();
 
@@ -235,7 +238,7 @@ const LeftNav = () => {
           size="x-large"
           className="bg-green-500 hover:bg-gray-600 "
           icon={<FiPlus size={24} />}
-          onClick={() => {}}
+          onClick={() => setUsersPopup(!usersPopup)}
         />
         <Icon
           size="x-large"
@@ -244,6 +247,7 @@ const LeftNav = () => {
           onClick={signOut}
         />
       </div>
+     {usersPopup && <UsersPopup onHide={()=>setUsersPopup(false)} title="Find users"/>}
     </div>
   );
 };
